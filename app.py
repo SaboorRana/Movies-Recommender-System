@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request
+import streamlit as st
 import pickle
 import requests
 import os
 
-app = Flask(__name__)
-
+# Function to fetch movie posters
 def fetch_poster(movie_id):
     try:
         os.environ['NO_PROXY'] = 'api.themoviedb.org'
@@ -22,6 +21,7 @@ def fetch_poster(movie_id):
     except requests.exceptions.RequestException as e:
         return "https://via.placeholder.com/500x750?text=Error+Fetching+Poster"
 
+# Function to recommend movies
 def recommend(movie):
     try:
         movie_index = movies_df[movies_df['title'] == movie].index[0]
@@ -42,17 +42,22 @@ movies_df = pickle.load(open('movies.pkl', 'rb'))
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 movie_titles = movies_df['title'].values
 
-@app.route('/')
-def index():
-    return render_template('index.html', movie_titles=movie_titles)
+# Streamlit UI
+st.title("Movie Recommender System")
+st.write("Select a movie from the dropdown below to get recommendations.")
 
-@app.route('/recommend', methods=['POST'])
-def recommend_movies():
-    selected_movie_name = request.form['movie']
+# Movie selection dropdown
+selected_movie_name = st.selectbox("Choose a movie:", movie_titles)
+
+if st.button("Recommend"):
     names, posters = recommend(selected_movie_name)
     combined = list(zip(names, posters))  # Combine names and posters into tuples
-    return render_template('recommend.html', combined=combined)
+    
+    # Display recommended movies and their posters
+    for name, poster in combined:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(poster, caption=name, use_column_width=True)
+        with col2:
+            st.write(name)
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
