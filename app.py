@@ -39,9 +39,7 @@ def recommend(movie):
 
 # Load pickled data
 movies_df = pickle.load(open('movies.pkl', 'rb'))
-similarity_part_0 = pickle.load(open('similarity_part_0.pkl', 'rb'))
-similarity_part_1 = pickle.load(open('similarity_part_1.pkl', 'rb'))
-similarity = similarity_part_0 + similarity_part_1
+similarity = pickle.load(open('similarity.pkl', 'rb'))
 movie_titles = movies_df['title'].values
 
 @app.route('/')
